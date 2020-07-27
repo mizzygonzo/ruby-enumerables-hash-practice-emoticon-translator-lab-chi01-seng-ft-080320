@@ -1,35 +1,29 @@
 require 'yaml'
+require 'pry'
 
 def load_library(file_path)
-  get_emoticon = {}
-  get_meaning = {}
-  emoticons = YAML.load_file(file_path)
+  hash = Hash.new
+  hash["get_emoticon"] = {}
+  hash["get_meaning"] = {}
+  
+  file_hash = YAML.load_file(file_path)
 
-  emoticons.each do |emoticon|
-    meaning = emoticon.first
-    english_emoji = emoticon.last.first
-    japanese_emoji = emoticon.last.last
-
-    get_meaning[japanese_emoji] = meaning
-    get_emoticon[english_emoji] = japanese_emoji
+  file_hash.each do |meaning, emoticons|
+    hash["get_emoticon"][emoticons.first] = emoticons.last
+    emoticons.each do |emoticon|
+      hash["get_meaning"][emoticon] = meaning
+    end
   end
-  {"get_emoticon" => get_emoticon, "get_meaning" => get_meaning}
+  
+  hash
 end
 
-def get_japanese_emoticon(file_path, emoticon)
-  h = load_library(file_path)
-  if h.values.first[emoticon]
-    h.values.first[emoticon]
-  else
-    "Sorry, that emoticon was not found"
-  end
+def get_japanese_emoticon(file_path, english_emoticon)
+  hash = load_library(file_path)
+  hash["get_emoticon"][english_emoticon] ? hash["get_emoticon"][english_emoticon] : "Sorry, that emoticon was not found"
 end
 
-def get_english_meaning(file_path, emoticon)
-  h = load_library(file_path)
-  if h.values.last[emoticon]
-    h.values.last[emoticon]
-  else
-    "Sorry, that emoticon was not found"
-  end
+def get_english_meaning(file_path, japanese_emoticon)
+  hash = load_library(file_path)
+  hash["get_meaning"][japanese_emoticon] ? hash["get_meaning"][japanese_emoticon] : "Sorry, that emoticon was not found"
 end
